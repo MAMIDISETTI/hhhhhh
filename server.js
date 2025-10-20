@@ -14,8 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 // Allow multiple client origins via comma-separated env var; include localhost fallback
-const CLIENT_URLS = process.env.CLIENT_URLS || process.env.CLIENT_URL || "http://localhost:5173";
+const CLIENT_URLS = process.env.CLIENT_URLS || process.env.CLIENT_URL ;
 const allowedOrigins = CLIENT_URLS.split(",").map((o) => o.trim()).filter(Boolean);
+const allowedOriginPatterns = [/\.vercel\.app$/i];
 
 console.log("Allowed CORS origins:", allowedOrigins);
 
@@ -24,6 +25,7 @@ app.use(
     origin: function (origin, callback) {
       if (!origin) return callback(null, true); // allow non-browser clients
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (allowedOriginPatterns.some((re) => re.test(origin))) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "DELETE", "PUT"],
